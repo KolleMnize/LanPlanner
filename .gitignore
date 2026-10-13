@@ -13,17 +13,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 
-## NuGet
-*.user
-*.userosscache
-*.sln.docstates
-*.suo
-*.userprefs
-*.cache
-*.opensdf
-*.sdf
-
-## Visual Studio
+## Visual Studio / user-specific files
 .vs/
 *.user
 *.userosscache
@@ -38,49 +28,47 @@ bld/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-## User-specific files
-*.user
-*.userosscache
-*.sln.docstates
-
-## Local History for Visual Studio
+## Local History
 .localhistory/
-
-## Local History for Visual Studio Code
 .history/
 
-## Node.js (für Angular)
+## Lokale Konfiguration und Secrets (Auth-Durchstich)
+appsettings.Development.json
+appsettings.*.local.json
+tools/create-test-token.ps1
+tools/create-test-token.sh
+*.token
+
+# ============
+# Node.js / Angular
+# ============
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-## Angular
+.yarn/cache
+.yarn/install-state.gz
 dist/
 out-tsc/
 .angular/
-.svelte-kit/
-build/
 tmp/
-e2e/
-*.spec.ts
 
-## IDE
+# ============
+# IDE / OS
+# ============
 .vscode/
 .idea/
 *.swp
 *.swo
-
-## OS
 .DS_Store
 Thumbs.db
 
-## Logs
+# ============
+# Logs und Environment-Dateien
+# ============
 *.log
 *.log.*
-
-## Environment files
 .env
 .env.local
 .env.*.local
