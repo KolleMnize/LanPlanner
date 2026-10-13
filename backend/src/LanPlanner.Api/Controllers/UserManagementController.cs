@@ -1,11 +1,13 @@
 using LanPlanner.Api.Authentication;
 using LanPlanner.Api.Extensions;
 using LanPlanner.Application.Features.Users.GetCurrentUser;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LanPlanner.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/users")]
 public class UserManagementController(ICurrentUser currentUser, GetCurrentUserHandler getCurrentUserHandler) : ControllerBase
 {
