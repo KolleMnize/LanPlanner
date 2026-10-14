@@ -44,9 +44,9 @@
         </li>
       </ul>
       <div class="d-flex align-items-center">
-        @if (email(); as mail) {
+        @if (user(); as u) {
           <span class="navbar-text"
-            >Angemeldet als <strong>{{ mail }}</strong></span
+            >Angemeldet als <strong>{{ u.name }}</strong></span
           >
         } @else {
           <span class="navbar-text text-warning">Nicht angemeldet</span>
@@ -55,4 +55,19 @@
     </div>
   </div>
 </nav>
-<router-outlet></router-outlet>
+@if (needsRegistration()) {
+  <div class="container mt-4" style="max-width: 28rem">
+    <h4>Willkommen! Wähle einen Nutzernamen</h4>
+    <div class="input-group mb-2">
+      <input #nameInput class="form-control" maxlength="30" placeholder="Nutzername" />
+      <button class="btn btn-primary" type="button" (click)="register(nameInput.value)">
+        Weiter
+      </button>
+    </div>
+    @if (registerError(); as err) {
+      <div class="text-danger">{{ err }}</div>
+    }
+  </div>
+} @else {
+  <router-outlet></router-outlet>
+}

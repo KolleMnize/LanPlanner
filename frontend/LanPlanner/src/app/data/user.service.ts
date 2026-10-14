@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { User, UserResponse } from '../models/user.model';
 
@@ -11,13 +11,21 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  async getCurrentUser(): Promise<User> {
-    const result = await firstValueFrom(this.http.get<UserResponse>(`${this.api}/me`));
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      const result = await firstValueFrom(this.http.get<UserResponse>(`${this.api}/me`));
 
-    if (!result?.user) {
-      throw new Error('No user returned');
+      return result.user;
+    } catch (e) {
+      if (e instanceof HttpErrorResponse && e.status === 404) {
+        return null;
+      }
+      throw e;
     }
+  }
 
+  async register(name: string): Promise<User> {
+    const result = await firstValueFrom(this.http.post<UserResponse>(`${this.api}/me`, { name }));
     return result.user;
   }
 }
