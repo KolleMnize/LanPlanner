@@ -3,7 +3,7 @@ using LanPlanner.Domain.SharedKernel;
 
 namespace LanPlanner.Domain.Users;
 
-public interface IUserRepository : IBaseRepository<User, Guid>
+public interface IUserRepository : IBaseRepository<User, UserId>
 {
     /// <summary>
     /// Retrieves a user by their email address.
