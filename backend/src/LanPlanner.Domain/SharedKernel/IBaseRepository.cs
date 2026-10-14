@@ -16,7 +16,7 @@ public interface IBaseRepository<TEntity, TId>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>
     /// A success result wrapped in an ErrorOr result.
-    /// Possible error types: <see cref="ErrorType.Unexpected"/>.
+    /// Possible error types: <see cref="ErrorType.Unexpected"/> and <see cref="ErrorType.Conflict"/>.
     /// </returns>
     /// <exception cref="OperationCanceledException">Thrown if the operation is canceled.</exception>
     public Task<ErrorOr<Success>> Create(TEntity entity, CancellationToken cancellationToken);
