@@ -1,5 +1,6 @@
 
 using LanPlanner.Application.Features.Users.GetCurrentUser;
+using LanPlanner.Application.Features.Users.RegisterUser;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -10,5 +11,6 @@ public class DependencyInjection
     public static void RegisterApplicationServices(IServiceCollection services, IHostEnvironment environment)
     {
         services.AddScoped<GetCurrentUserHandler>();
+        services.AddScoped<RegisterUserHandler>();
     }
 }

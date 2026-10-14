@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LanPlanner.Domain\LanPlanner.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
