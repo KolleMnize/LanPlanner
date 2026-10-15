@@ -20,10 +20,10 @@ public class UserManagementController(ICurrentUser currentUser, GetCurrentUserHa
     }
 
     [HttpPost("me", Name = "RegisterUser")]
-    public async Task<IActionResult> Register([FromBody] string Name, CancellationToken ct)
+    public async Task<IActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken ct)
     {
         var result = await registerUserHandler.Handle(
-            new RegisterUserCommand(currentUser.Email ?? string.Empty, Name), ct);
+            new RegisterUserCommand(currentUser.Email ?? string.Empty, request.Name ?? string.Empty), ct);
         return result.ToProblemDetails(this);
     }
 }
