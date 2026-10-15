@@ -12,6 +12,11 @@ builder.Services.AddAccessJwtAuthentication(builder.Configuration);
 
 LanPlanner.Application.Installer.DependencyInjection.RegisterApplicationServices(builder.Services, builder.Environment);
 
+var connectionString = builder.Configuration.GetConnectionString("LanPlanner")
+    ?? throw new InvalidOperationException("ConnectionStrings:LanPlanner ist nicht konfiguriert (User Secrets).");
+
+LanPlanner.Infrastructure.Installer.DependencyInjection.RegisterInfrastructureServices(builder.Services, connectionString);
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 //builder.Services.AddOpenApi();
 
