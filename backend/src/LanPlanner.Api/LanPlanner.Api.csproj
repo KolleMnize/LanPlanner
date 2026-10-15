@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LanPlanner.Application\LanPlanner.Application.csproj" />
+    <ProjectReference Include="..\LanPlanner.Infrastructure\LanPlanner.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,5 +3,6 @@
     <Project Path="src/LanPlanner.Api/LanPlanner.Api.csproj" />
     <Project Path="src/LanPlanner.Application/LanPlanner.Application.csproj" />
     <Project Path="src/LanPlanner.Domain/LanPlanner.Domain.csproj" />
+    <Project Path="src/LanPlanner.Infrastructure/LanPlanner.Infrastructure.csproj" />
   </Folder>
 </Solution>
