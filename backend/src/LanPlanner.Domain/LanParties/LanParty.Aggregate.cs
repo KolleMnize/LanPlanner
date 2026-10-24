@@ -115,6 +115,25 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> AppointModerator(UserId actor, UserId userId)
+    {
+        if (!participants.Any(p => p.UserId == actor && p.IsModerator))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        var participant = FindParticipant(userId);
+        if (participant is null)
+            return LanPartyErrors.TargetNotParticipant;
+
+        if (participant.IsModerator)
+            return LanPartyErrors.TargetAlreadyModerator;
+
+        AddModerator(participant);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
