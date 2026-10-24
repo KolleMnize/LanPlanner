@@ -22,6 +22,19 @@ internal static class LanPartyTestData
         return party;
     }
 
+    internal static LanParty CreateMockedLanPartyWithParticipant(UserId moderator, UserId participant)
+    {
+        var id = LanPartyId.Create(Guid.NewGuid()).Value;
+        var creator = moderator;
+        var name = "Mocked Lan Party";
+        var start = Start;
+        var end = End;
+        var party = LanParty.Create(id, creator, name, start, end).Value;
+        party.Join(participant);
+        party.ClearDomainEvents();
+        return party;
+    }
+
     internal static LanParty CreateMockedLanPartyWithVotingClosed(UserId moderator)
     {
         var party = CreateMockedLanParty(moderator);
