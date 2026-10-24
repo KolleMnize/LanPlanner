@@ -4,7 +4,7 @@ using LanPlanner.Domain.LanParties.Events;
 using LanPlanner.Domain.SharedKernel;
 using LanPlanner.Domain.Users;
 
-namespace LanPlanner.Domain.Tests.LanPartyTests;
+namespace LanPlanner.Domain.Tests.LanPartiesTests;
 
 /// <summary>
 /// Tests for the LanParty aggregate.
