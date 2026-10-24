@@ -5,4 +5,8 @@
     <Project Path="src/LanPlanner.Domain/LanPlanner.Domain.csproj" />
     <Project Path="src/LanPlanner.Infrastructure/LanPlanner.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LanPlanner.Api.Tests/LanPlanner.Api.Tests.csproj" />
+    <Project Path="tests/LanPlanner.Domain.Tests/LanPlanner.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
