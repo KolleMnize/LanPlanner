@@ -39,9 +39,21 @@ public class LanParty : Aggregate<LanPartyId>
 
         party.AddParticipant(creator);
         party.AddModerator(creator);
-        party.OpenVoting();
+        party.OpenVotingInternal();
 
         return party;
+    }
+
+    public ErrorOr<Success> CloseVoting(UserId actor)
+    {
+        if (!moderators.Contains(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        CloseVotingInternal();
+        return Result.Success;
     }
 
     private void AddParticipant(UserId userId)
@@ -56,13 +68,13 @@ public class LanParty : Aggregate<LanPartyId>
         Raise(new ModeratorAppointed(Id, userId));
     }
 
-    private void OpenVoting()
+    private void OpenVotingInternal()
     {
         VotingIsOpen = true;
         Raise(new VotingOpened(Id));
     }
 
-    private void CloseVoting()
+    private void CloseVotingInternal()
     {
         VotingIsOpen = false;
         Raise(new VotingClosed(Id));

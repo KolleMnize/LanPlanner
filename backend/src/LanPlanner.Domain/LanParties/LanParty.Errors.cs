@@ -18,4 +18,13 @@ public static class LanPartyErrors
         code: "LanParty.EndBeforeStart",
         description: "End date must not be before start date.");
 
+    // voting related errors
+    public static readonly Error NotAModerator = Error.Forbidden(
+        code: "LanParty.NotAModerator",
+        description: "User is not a moderator.");
+
+    public static readonly Error VotingNotOpen = Error.Conflict(
+        code: "LanParty.VotingNotOpen",
+        description: "Voting is not open.");
+
 }

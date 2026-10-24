@@ -21,4 +21,18 @@ internal static class LanPartyTestData
         party.ClearDomainEvents();
         return party;
     }
+
+    internal static LanParty CreateMockedLanPartyWithVotingClosed(UserId moderator)
+    {
+        var id = LanPartyId.Create(Guid.NewGuid()).Value;
+        var creator = moderator;
+        var name = "Mocked Lan Party";
+        var start = Start;
+        var end = End;
+        var party = LanParty.Create(id, creator, name, start, end).Value;
+
+        party.CloseVoting(moderator);
+        party.ClearDomainEvents();
+        return party;
+    }
 }
