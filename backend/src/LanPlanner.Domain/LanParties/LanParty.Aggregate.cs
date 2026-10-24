@@ -23,11 +23,9 @@ public class LanParty : Aggregate<LanPartyId>
 
     public static ErrorOr<LanParty> Create(LanPartyId id, UserId creator, string name, DateOnly start, DateOnly end)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return LanPartyErrors.NameRequired;
-
-        if (end < start)
-            return LanPartyErrors.EndBeforeStart;
+        var validationResult = ValidateDetails(name, start, end);
+        if (validationResult.IsError)
+            return validationResult.Errors;
 
         var party = new LanParty
         {
@@ -99,6 +97,41 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> ChangeDetails(UserId actor, string name, DateOnly start, DateOnly end)
+    {
+        if (!moderators.Contains(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        var validationResult = ValidateDetails(name, start, end);
+        if (validationResult.IsError)
+            return validationResult.Errors;
+
+        Name = name;
+        Start = start;
+        End = end;
+
+        Raise(new LanPartyDetailsChanged(Id, Name, Start, End));
+        return Result.Success;
+    }
+
+    private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
+    {
+        List<Error> errors = new List<Error>();
+
+        if (string.IsNullOrWhiteSpace(name))
+            errors.Add(LanPartyErrors.NameRequired);
+
+        if (end < start)
+            errors.Add(LanPartyErrors.EndBeforeStart);
+
+        if (errors.Count > 0)
+            return errors;
+
+        return Result.Success;
+    }
     private void AddParticipant(UserId userId)
     {
         participants.Add(userId);
