@@ -22,11 +22,15 @@ public static class LanPartyErrors
         code: "LanParty.Ended ",
         description: "The LAN party has already ended.");
 
-    // voting related errors
+    // participant related errors
+    public static readonly Error AlreadyParticipant = Error.Conflict(
+        code: "LanParty.AlreadyParticipant",
+        description: "User is already a participant.");
     public static readonly Error NotAModerator = Error.Forbidden(
         code: "LanParty.NotAModerator",
         description: "User is not a moderator.");
 
+    // voting related errors
     public static readonly Error VotingNotOpen = Error.Conflict(
         code: "LanParty.VotingNotOpen",
         description: "Voting is not open.");
