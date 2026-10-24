@@ -14,6 +14,7 @@ public class LanParty : Aggregate<LanPartyId>
     public DateOnly Start { get; private set; }
     public DateOnly End { get; private set; }
     public bool VotingIsOpen { get; private set; }
+    public bool IsEnded { get; private set; }
 
     public IReadOnlyList<UserId> Participants => participants.AsReadOnly();
     public IReadOnlyList<UserId> Moderators => moderators.AsReadOnly();
@@ -56,6 +57,21 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> EndParty(UserId actor)
+    {
+        if (!moderators.Contains(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        if (VotingIsOpen)
+            return LanPartyErrors.VotingNotClosed;
+
+        EndPartyInternal();
+        return Result.Success;
+    }
+
     private void AddParticipant(UserId userId)
     {
         participants.Add(userId);
@@ -78,6 +94,12 @@ public class LanParty : Aggregate<LanPartyId>
     {
         VotingIsOpen = false;
         Raise(new VotingClosed(Id));
+    }
+
+    private void EndPartyInternal()
+    {
+        IsEnded = true;
+        Raise(new LanPartyEnded(Id));
     }
 
 }
