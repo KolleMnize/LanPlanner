@@ -1,6 +1,6 @@
 namespace LanPlanner.Domain.SharedKernel;
 
-public class AggregateId
+public abstract class AggregateId : IEquatable<AggregateId>
 {
     public Guid Value { get; }
 
@@ -15,4 +15,10 @@ public class AggregateId
     public override bool Equals(object? obj) => Equals(obj as AggregateId);
     public override int GetHashCode() => HashCode.Combine(GetType(), Value);
     public override string ToString() => Value.ToString();
+
+    public static bool operator ==(AggregateId? left, AggregateId? right) =>
+    left is null ? right is null : left.Equals(right);
+
+    public static bool operator !=(AggregateId? left, AggregateId? right) =>
+        !(left == right);
 }
