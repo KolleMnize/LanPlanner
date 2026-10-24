@@ -1,6 +1,6 @@
 using LanPlanner.Domain.SharedKernel;
 
-namespace LanPlanner.Domain.Tests.SharedKernel;
+namespace LanPlanner.Domain.Tests.SharedKernelTests;
 
 [TestClass]
 public class AggregateTests
