@@ -72,6 +72,21 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> OpenVoting(UserId actor)
+    {
+        if (!moderators.Contains(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        if (VotingIsOpen)
+            return LanPartyErrors.VotingNotClosed;
+
+        OpenVotingInternal();
+        return Result.Success;
+    }
+
     private void AddParticipant(UserId userId)
     {
         participants.Add(userId);
