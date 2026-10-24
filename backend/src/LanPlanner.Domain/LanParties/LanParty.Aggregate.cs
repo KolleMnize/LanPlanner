@@ -87,6 +87,18 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> Join(UserId actor)
+    {
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        if (participants.Contains(actor))
+            return LanPartyErrors.AlreadyParticipant;
+
+        AddParticipant(actor);
+        return Result.Success;
+    }
+
     private void AddParticipant(UserId userId)
     {
         participants.Add(userId);
