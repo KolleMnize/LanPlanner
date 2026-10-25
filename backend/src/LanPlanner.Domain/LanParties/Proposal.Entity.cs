@@ -9,6 +9,9 @@ public class Proposal
     private List<UserId> _vetos = [];
 
     public required GameModeId GameModeId { get; init; }
+    internal IReadOnlyList<Vote> Votes => _votes.AsReadOnly();
+    internal IReadOnlyList<UserId> Vetos => _vetos.AsReadOnly();
+
     private Proposal() { } // Required by EF Core or other ORMs
 
     internal static Proposal Create(GameModeId gameModeId)
