@@ -25,4 +25,6 @@ public class Proposal
         => _vetos.Add(userId);
     internal bool HasVetoFrom(UserId userId)
         => _vetos.Contains(userId);
+    internal void RemoveVeto(UserId userId)
+        => _vetos.Remove(userId);
 }

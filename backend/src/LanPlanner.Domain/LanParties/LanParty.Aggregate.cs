@@ -258,6 +258,19 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> RemoveVeto(UserId actor)
+    {
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposalVetoedBy(actor);
+        if (proposal is null)
+            return LanPartyErrors.NotVetoed;
+
+        RemoveVetoInternal(proposal, actor);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -362,5 +375,10 @@ public class LanParty : Aggregate<LanPartyId>
     {
         proposal.AddVeto(userId);
         Raise(new GameModeVetoed(Id, userId, proposal.GameModeId));
+    }
+    private void RemoveVetoInternal(Proposal proposal, UserId userId)
+    {
+        proposal.RemoveVeto(userId);
+        Raise(new VetoRemoved(Id, userId, proposal.GameModeId));
     }
 }

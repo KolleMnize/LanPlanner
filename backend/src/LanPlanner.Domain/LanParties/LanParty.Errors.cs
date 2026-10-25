@@ -82,4 +82,8 @@ public static class LanPartyErrors
     public static readonly Error AlreadyVetoed = Error.Conflict(
         code: "LanParty.UserAlreadyVetoed",
         description: "The User has already vetoed.");
+
+    public static readonly Error NotVetoed = Error.NotFound(
+        code: "LanParty.NotVetoed",
+        description: "The user has not vetoed this game mode.");
 }
