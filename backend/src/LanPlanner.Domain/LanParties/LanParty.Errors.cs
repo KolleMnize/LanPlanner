@@ -31,7 +31,7 @@ public static class LanPartyErrors
         code: "LanParty.TargetNotParticipant",
         description: "The target user is not a participant.");
 
-    public static readonly Error NotAParticipant = Error.Validation(
+    public static readonly Error NotAParticipant = Error.Forbidden(
         code: "LanParty.NotAParticipant",
         description: "User is not a participant.");
 
@@ -60,8 +60,18 @@ public static class LanPartyErrors
         code: "LanParty.VotingNotClosed",
         description: "Voting is not closed.");
 
+    public static readonly Error GameModeNotProposed = Error.NotFound(
+        code: "LanParty.GameModeNotProposed",
+        description: "The game mode has not been proposed.");
+
+    public static readonly Error AlreadyVoted = Error.Conflict(
+        code: "LanParty.AlreadyVoted",
+        description: "User has already voted.");
+
     // Proposal errors
     public static readonly Error GameModeAlreadyProposed = Error.Conflict(
         code: "LanParty.GameModeAlreadyProposed",
         description: "The game mode has already been proposed.");
+
+
 }
