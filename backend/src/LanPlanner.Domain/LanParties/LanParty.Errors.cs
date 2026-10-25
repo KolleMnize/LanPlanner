@@ -68,6 +68,11 @@ public static class LanPartyErrors
         code: "LanParty.AlreadyVoted",
         description: "User has already voted.");
 
+    public static readonly Error NotVoted = Error.NotFound(
+        code: "LanParty.NotVoted",
+        description: "User has not voted."
+    );
+
     // Proposal errors
     public static readonly Error GameModeAlreadyProposed = Error.Conflict(
         code: "LanParty.GameModeAlreadyProposed",

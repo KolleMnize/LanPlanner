@@ -199,6 +199,23 @@ public class LanParty : Aggregate<LanPartyId>
         return FindProposal(gameModeId)?.FindVote(userId)?.Direction;
     }
 
+    public ErrorOr<Success> ChangeVote(UserId actor, GameModeId gameModeId)
+    {
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVote = proposal.FindVote(actor);
+        if (existingVote is null)
+            return LanPartyErrors.NotVoted;
+
+        FlipVote(proposal, existingVote);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -282,6 +299,11 @@ public class LanParty : Aggregate<LanPartyId>
             _ => throw new ArgumentOutOfRangeException(nameof(direction))
         };
         Raise(domainEvent);
+    }
 
+    private void FlipVote(Proposal proposal, Vote vote)
+    {
+        vote.Flip();
+        Raise(new VoteChanged(Id, vote.UserId, proposal.GameModeId, vote.Direction));
     }
 }

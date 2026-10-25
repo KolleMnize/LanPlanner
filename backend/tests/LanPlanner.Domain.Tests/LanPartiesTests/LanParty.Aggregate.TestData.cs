@@ -89,4 +89,12 @@ internal static class LanPartyTestData
         party.ClearDomainEvents();
         return party;
     }
+
+    internal static LanParty CreateMockedLanPartyWithProposalAndVoteWithClosedVoting(UserId moderator, GameModeId proposal, VoteDirection voteDirection)
+    {
+        var party = CreateMockedLanPartyWithProposalAndVote(moderator, proposal, voteDirection);
+        party.CloseVoting(moderator);
+        party.ClearDomainEvents();
+        return party;
+    }
 }
