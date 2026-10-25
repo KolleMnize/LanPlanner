@@ -43,7 +43,7 @@ public class LanParty : Aggregate<LanPartyId>
 
     public ErrorOr<Success> CloseVoting(UserId actor)
     {
-        if (!participants.Any(p => p.UserId == actor && p.IsModerator))
+        if (!IsModerator(actor))
             return LanPartyErrors.NotAModerator;
 
         if (!VotingIsOpen)
@@ -55,7 +55,7 @@ public class LanParty : Aggregate<LanPartyId>
 
     public ErrorOr<Success> EndParty(UserId actor)
     {
-        if (!participants.Any(p => p.UserId == actor && p.IsModerator))
+        if (!IsModerator(actor))
             return LanPartyErrors.NotAModerator;
 
         if (IsEnded)
@@ -70,7 +70,7 @@ public class LanParty : Aggregate<LanPartyId>
 
     public ErrorOr<Success> OpenVoting(UserId actor)
     {
-        if (!participants.Any(p => p.UserId == actor && p.IsModerator))
+        if (!IsModerator(actor))
             return LanPartyErrors.NotAModerator;
 
         if (IsEnded)
@@ -97,7 +97,7 @@ public class LanParty : Aggregate<LanPartyId>
 
     public ErrorOr<Success> ChangeDetails(UserId actor, string name, DateOnly start, DateOnly end)
     {
-        if (!participants.Any(p => p.UserId == actor && p.IsModerator))
+        if (!IsModerator(actor))
             return LanPartyErrors.NotAModerator;
 
         if (IsEnded)
@@ -112,6 +112,47 @@ public class LanParty : Aggregate<LanPartyId>
         End = end;
 
         Raise(new LanPartyDetailsChanged(Id, Name, Start, End));
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> AppointModerator(UserId actor, UserId userId)
+    {
+        if (!IsModerator(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        var participant = FindParticipant(userId);
+        if (participant is null)
+            return LanPartyErrors.TargetNotParticipant;
+
+        if (participant.IsModerator)
+            return LanPartyErrors.TargetAlreadyModerator;
+
+        AddModerator(participant);
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> DismissModerator(UserId actor, UserId userId)
+    {
+        if (!IsModerator(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        var participant = FindParticipant(userId);
+        if (participant is null)
+            return LanPartyErrors.TargetNotParticipant;
+
+        if (!participant.IsModerator)
+            return LanPartyErrors.TargetNotModerator;
+
+        if (participants.Count(p => p.IsModerator) == 1)
+            return LanPartyErrors.LastModerator;
+
+        RemoveModerator(participant);
         return Result.Success;
     }
 
@@ -134,6 +175,9 @@ public class LanParty : Aggregate<LanPartyId>
     private Participant? FindParticipant(UserId userId)
         => participants.Find(p => p.UserId == userId);
 
+    private bool IsModerator(UserId userId)
+        => participants.Any(p => p.UserId == userId && p.IsModerator);
+
     private Participant AddParticipant(UserId userId)
     {
         var participant = Participant.Create(userId);
@@ -146,6 +190,12 @@ public class LanParty : Aggregate<LanPartyId>
     {
         participant.Promote();
         Raise(new ModeratorAppointed(Id, participant.UserId));
+    }
+
+    private void RemoveModerator(Participant participant)
+    {
+        participant.Demote();
+        Raise(new ModeratorDismissed(Id, participant.UserId));
     }
 
     private void OpenVotingInternal()
