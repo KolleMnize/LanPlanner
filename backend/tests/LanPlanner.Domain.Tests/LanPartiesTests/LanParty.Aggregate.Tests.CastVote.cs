@@ -52,6 +52,20 @@ public partial class LanPartyAggregateTests
     }
 
     [TestMethod]
+    public void Vote_AlreadyVoted_ReturnsAlreadyVoted()
+    {
+        var creator = UserId.Create(Guid.NewGuid()).Value;
+        var gameMode = GameModeId.Create(Guid.NewGuid()).Value;
+        var lanParty = LanPartyTestData.CreateMockedLanPartyWithProposalAndVote(creator, gameMode, VoteDirection.Up);
+
+        var result = lanParty.CastVote(creator, gameMode, VoteDirection.Up);
+
+        Assert.IsTrue(result.IsError);
+        Assert.Contains(LanPartyErrors.AlreadyVoted, result.Errors);
+        Assert.IsFalse(lanParty.DomainEvents.Any(e => e is GameModeUpvoted));
+    }
+
+    [TestMethod]
     public void Vote_VotingClosed_ReturnsVotingNotOpen()
     {
         var creator = UserId.Create(Guid.NewGuid()).Value;
@@ -78,6 +92,8 @@ public partial class LanPartyAggregateTests
         Assert.Contains(LanPartyErrors.GameModeNotProposed, result.Errors);
         Assert.IsFalse(lanParty.DomainEvents.Any());
     }
+
+
 
     [TestMethod]
     public void Vote_SameUserOtherGameMode_Succeeds()
