@@ -287,6 +287,23 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> Leave(UserId userId)
+    {
+        Participant? participant = FindParticipant(userId);
+
+        if (participant is null)
+            return LanPartyErrors.NotAParticipant;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        if (participant.IsModerator && Moderators.Count == 1)
+            return LanPartyErrors.LastModerator;
+
+        RemoveParticipantInternal(participant);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -408,5 +425,22 @@ public class LanParty : Aggregate<LanPartyId>
 
         foreach (var veto in proposal.Vetos)
             Raise(new VetoRemoved(Id, veto, proposal.GameModeId));
+    }
+
+    private void RemoveParticipantInternal(Participant participant)
+    {
+        var userId = participant.UserId;
+
+        participants.Remove(participant);
+        Raise(new ParticipantLeft(Id, userId));
+
+        foreach (var proposal in proposals)
+        {
+            if (proposal.FindVote(userId) is { } vote)
+                RemoveVoteInternal(proposal, vote);
+        }
+
+        if (FindProposalVetoedBy(userId) is { } veto)
+            RemoveVetoInternal(veto, userId);
     }
 }
