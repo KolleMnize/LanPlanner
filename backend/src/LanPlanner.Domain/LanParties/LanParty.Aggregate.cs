@@ -233,6 +233,31 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public GameModeId? GetVeto(UserId userId)
+    {
+        return FindProposalVetoedBy(userId)?.GameModeId;
+    }
+
+    public ErrorOr<Success> CastVeto(UserId actor, GameModeId gameModeId)
+    {
+        if (!IsParticipant(actor))
+            return LanPartyErrors.NotAParticipant;
+
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVeto = FindProposalVetoedBy(actor);
+        if (existingVeto is not null)
+            return LanPartyErrors.AlreadyVetoed;
+
+        AddVeto(proposal, actor);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -328,5 +353,14 @@ public class LanParty : Aggregate<LanPartyId>
     {
         proposal.RemoveVote(vote);
         Raise(new VoteRemoved(Id, vote.UserId, proposal.GameModeId, vote.Direction));
+    }
+
+    private Proposal? FindProposalVetoedBy(UserId userId)
+        => proposals.Find(p => p.HasVetoFrom(userId));
+
+    private void AddVeto(Proposal proposal, UserId userId)
+    {
+        proposal.AddVeto(userId);
+        Raise(new GameModeVetoed(Id, userId, proposal.GameModeId));
     }
 }
