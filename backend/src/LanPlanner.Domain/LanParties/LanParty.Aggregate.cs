@@ -1,4 +1,5 @@
 using ErrorOr;
+using LanPlanner.Domain.Games;
 using LanPlanner.Domain.LanParties.Events;
 using LanPlanner.Domain.SharedKernel;
 using LanPlanner.Domain.Users;
@@ -8,6 +9,7 @@ namespace LanPlanner.Domain.LanParties;
 public class LanParty : Aggregate<LanPartyId>
 {
     private List<Participant> participants = [];
+    private List<Proposal> proposals = [];
     public string Name { get; private set; } = null!;
     public DateOnly Start { get; private set; }
     public DateOnly End { get; private set; }
@@ -16,6 +18,7 @@ public class LanParty : Aggregate<LanPartyId>
 
     public IReadOnlyList<UserId> Participants => participants.Select(p => p.UserId).ToList().AsReadOnly();
     public IReadOnlyList<UserId> Moderators => participants.Where(p => p.IsModerator).Select(p => p.UserId).ToList().AsReadOnly();
+    public IReadOnlyList<GameModeId> Proposals => proposals.Select(p => p.GameModeId).ToList().AsReadOnly();
 
     private LanParty() { } // Required by EF Core or other ORMs
 
@@ -156,6 +159,80 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> Propose(UserId actor, GameModeId gameModeId)
+    {
+        if (!IsParticipant(actor))
+            return LanPartyErrors.NotAParticipant;
+
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        if (FindProposal(gameModeId) is not null)
+            return LanPartyErrors.GameModeAlreadyProposed;
+
+        AddProposal(actor, gameModeId);
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> CastVote(UserId actor, GameModeId gameModeId, VoteDirection direction)
+    {
+        if (!IsParticipant(actor))
+            return LanPartyErrors.NotAParticipant;
+
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVote = proposal.FindVote(actor);
+        if (existingVote is not null)
+            return LanPartyErrors.AlreadyVoted;
+
+        AddVote(proposal, actor, direction);
+        return Result.Success;
+    }
+
+    public VoteDirection? GetVote(UserId userId, GameModeId gameModeId)
+    {
+        return FindProposal(gameModeId)?.FindVote(userId)?.Direction;
+    }
+
+    public ErrorOr<Success> ChangeVote(UserId actor, GameModeId gameModeId)
+    {
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVote = proposal.FindVote(actor);
+        if (existingVote is null)
+            return LanPartyErrors.NotVoted;
+
+        FlipVote(proposal, existingVote);
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> RemoveVote(UserId actor, GameModeId gameModeId)
+    {
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVote = proposal.FindVote(actor);
+        if (existingVote is null)
+            return LanPartyErrors.NotVoted;
+
+        RemoveVoteInternal(proposal, existingVote);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -177,6 +254,8 @@ public class LanParty : Aggregate<LanPartyId>
 
     private bool IsModerator(UserId userId)
         => participants.Any(p => p.UserId == userId && p.IsModerator);
+    private bool IsParticipant(UserId userId)
+        => participants.Any(p => p.UserId == userId);
 
     private Participant AddParticipant(UserId userId)
     {
@@ -216,4 +295,38 @@ public class LanParty : Aggregate<LanPartyId>
         Raise(new LanPartyEnded(Id));
     }
 
+    private void AddProposal(UserId actor, GameModeId gameModeId)
+    {
+        var proposal = Proposal.Create(gameModeId);
+        proposals.Add(proposal);
+        Raise(new GameModeProposed(Id, actor, gameModeId));
+    }
+
+    private Proposal? FindProposal(GameModeId gameModeId)
+        => proposals.Find(p => p.GameModeId == gameModeId);
+
+    private void AddVote(Proposal proposal, UserId userId, VoteDirection direction)
+    {
+        proposal.AddVote(Vote.Create(userId, direction));
+
+        IDomainEvent domainEvent = direction switch
+        {
+            VoteDirection.Up => new GameModeUpvoted(Id, userId, proposal.GameModeId),
+            VoteDirection.Down => new GameModeDownvoted(Id, userId, proposal.GameModeId),
+            _ => throw new ArgumentOutOfRangeException(nameof(direction))
+        };
+        Raise(domainEvent);
+    }
+
+    private void FlipVote(Proposal proposal, Vote vote)
+    {
+        vote.Flip();
+        Raise(new VoteChanged(Id, vote.UserId, proposal.GameModeId, vote.Direction));
+    }
+
+    private void RemoveVoteInternal(Proposal proposal, Vote vote)
+    {
+        proposal.RemoveVote(vote);
+        Raise(new VoteRemoved(Id, vote.UserId, proposal.GameModeId, vote.Direction));
+    }
 }

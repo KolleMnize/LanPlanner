@@ -1,3 +1,4 @@
+using LanPlanner.Domain.Games;
 using LanPlanner.Domain.LanParties;
 using LanPlanner.Domain.Users;
 
@@ -60,6 +61,39 @@ internal static class LanPartyTestData
         var party = CreateMockedLanPartyWithVotingClosed(moderator);
 
         party.EndParty(moderator);
+        party.ClearDomainEvents();
+        return party;
+    }
+
+    internal static LanParty CreateMockedLanPartyWithProposal(UserId moderator, GameModeId proposal)
+    {
+        var party = CreateMockedLanParty(moderator);
+        party.Propose(moderator, proposal);
+        party.ClearDomainEvents();
+        return party;
+    }
+
+    internal static LanParty CreateMockedLanPartyWithProposalAndVote(UserId moderator, GameModeId proposal, VoteDirection voteDirection)
+    {
+        var party = CreateMockedLanPartyWithProposal(moderator, proposal);
+        party.CastVote(moderator, proposal, voteDirection);
+        party.ClearDomainEvents();
+        return party;
+    }
+    internal static LanParty CreateMockedLanPartyWithProposalWhichEnded(UserId moderator, GameModeId proposal)
+    {
+        var party = CreateMockedLanParty(moderator);
+        party.Propose(moderator, proposal);
+        party.CloseVoting(moderator);
+        party.EndParty(moderator);
+        party.ClearDomainEvents();
+        return party;
+    }
+
+    internal static LanParty CreateMockedLanPartyWithProposalAndVoteWithClosedVoting(UserId moderator, GameModeId proposal, VoteDirection voteDirection)
+    {
+        var party = CreateMockedLanPartyWithProposalAndVote(moderator, proposal, voteDirection);
+        party.CloseVoting(moderator);
         party.ClearDomainEvents();
         return party;
     }
