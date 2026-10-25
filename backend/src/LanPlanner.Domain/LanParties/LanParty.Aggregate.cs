@@ -216,6 +216,23 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> RemoveVote(UserId actor, GameModeId gameModeId)
+    {
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVote = proposal.FindVote(actor);
+        if (existingVote is null)
+            return LanPartyErrors.NotVoted;
+
+        RemoveVoteInternal(proposal, existingVote);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -305,5 +322,11 @@ public class LanParty : Aggregate<LanPartyId>
     {
         vote.Flip();
         Raise(new VoteChanged(Id, vote.UserId, proposal.GameModeId, vote.Direction));
+    }
+
+    private void RemoveVoteInternal(Proposal proposal, Vote vote)
+    {
+        proposal.RemoveVote(vote);
+        Raise(new VoteRemoved(Id, vote.UserId, proposal.GameModeId, vote.Direction));
     }
 }

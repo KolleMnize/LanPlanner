@@ -14,6 +14,9 @@ public class Proposal
 
     internal void AddVote(Vote vote)
         => _votes.Add(vote);
+
+    internal void RemoveVote(Vote vote)
+        => _votes.Remove(vote);
     internal Vote? FindVote(UserId userId)
         => _votes.FirstOrDefault(v => v.UserId == userId);
 }
