@@ -14,6 +14,6 @@ public class Proposal
 
     internal void AddVote(Vote vote)
         => _votes.Add(vote);
-    internal Vote? GetVote(UserId userId)
+    internal Vote? FindVote(UserId userId)
         => _votes.FirstOrDefault(v => v.UserId == userId);
 }

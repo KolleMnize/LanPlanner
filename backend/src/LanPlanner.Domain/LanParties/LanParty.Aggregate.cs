@@ -174,6 +174,31 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> CastVote(UserId actor, GameModeId gameModeId, VoteDirection direction)
+    {
+        if (!IsParticipant(actor))
+            return LanPartyErrors.NotAParticipant;
+
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        var existingVote = proposal.FindVote(actor);
+        if (existingVote is not null)
+            return LanPartyErrors.AlreadyVoted;
+
+        AddVote(proposal, actor, direction);
+        return Result.Success;
+    }
+
+    public VoteDirection? GetVote(UserId userId, GameModeId gameModeId)
+    {
+        return FindProposal(gameModeId)?.FindVote(userId)?.Direction;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -246,4 +271,17 @@ public class LanParty : Aggregate<LanPartyId>
     private Proposal? FindProposal(GameModeId gameModeId)
         => proposals.Find(p => p.GameModeId == gameModeId);
 
+    private void AddVote(Proposal proposal, UserId userId, VoteDirection direction)
+    {
+        proposal.AddVote(Vote.Create(userId, direction));
+
+        IDomainEvent domainEvent = direction switch
+        {
+            VoteDirection.Up => new GameModeUpvoted(Id, userId, proposal.GameModeId),
+            VoteDirection.Down => new GameModeDownvoted(Id, userId, proposal.GameModeId),
+            _ => throw new ArgumentOutOfRangeException(nameof(direction))
+        };
+        Raise(domainEvent);
+
+    }
 }
