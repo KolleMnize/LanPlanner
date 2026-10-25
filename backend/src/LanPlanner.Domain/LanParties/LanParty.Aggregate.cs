@@ -134,6 +134,28 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> DismissModerator(UserId actor, UserId userId)
+    {
+        if (!IsModerator(actor))
+            return LanPartyErrors.NotAModerator;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        var participant = FindParticipant(userId);
+        if (participant is null)
+            return LanPartyErrors.TargetNotParticipant;
+
+        if (!participant.IsModerator)
+            return LanPartyErrors.TargetNotModerator;
+
+        if (participants.Count(p => p.IsModerator) == 1)
+            return LanPartyErrors.LastModerator;
+
+        RemoveModerator(participant);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -168,6 +190,12 @@ public class LanParty : Aggregate<LanPartyId>
     {
         participant.Promote();
         Raise(new ModeratorAppointed(Id, participant.UserId));
+    }
+
+    private void RemoveModerator(Participant participant)
+    {
+        participant.Demote();
+        Raise(new ModeratorDismissed(Id, participant.UserId));
     }
 
     private void OpenVotingInternal()

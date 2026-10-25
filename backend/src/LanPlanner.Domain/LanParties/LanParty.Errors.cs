@@ -37,6 +37,14 @@ public static class LanPartyErrors
         code: "LanParty.TargetAlreadyModerator",
         description: "The target user is already a moderator.");
 
+    public static readonly Error TargetNotModerator = Error.Validation(
+        code: "LanParty.TargetNotModerator",
+        description: "The target user is not a moderator.");
+
+    public static readonly Error LastModerator = Error.Conflict(
+        code: "LanParty.LastModerator",
+        description: "Cannot remove the last moderator.");
+
     // voting related errors
     public static readonly Error VotingNotOpen = Error.Conflict(
         code: "LanParty.VotingNotOpen",
