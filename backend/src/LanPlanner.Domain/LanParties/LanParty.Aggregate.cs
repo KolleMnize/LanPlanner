@@ -271,6 +271,39 @@ public class LanParty : Aggregate<LanPartyId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> RemoveProposal(UserId removedBy, GameModeId gameModeId)
+    {
+        if (!IsModerator(removedBy))
+            return LanPartyErrors.NotAModerator;
+
+        if (!VotingIsOpen)
+            return LanPartyErrors.VotingNotOpen;
+
+        var proposal = FindProposal(gameModeId);
+        if (proposal is null)
+            return LanPartyErrors.GameModeNotProposed;
+
+        RemoveProposalInternal(proposal, removedBy);
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> Leave(UserId userId)
+    {
+        Participant? participant = FindParticipant(userId);
+
+        if (participant is null)
+            return LanPartyErrors.NotAParticipant;
+
+        if (IsEnded)
+            return LanPartyErrors.Ended;
+
+        if (participant.IsModerator && Moderators.Count == 1)
+            return LanPartyErrors.LastModerator;
+
+        RemoveParticipantInternal(participant);
+        return Result.Success;
+    }
+
     private static ErrorOr<Success> ValidateDetails(string name, DateOnly start, DateOnly end)
     {
         List<Error> errors = new List<Error>();
@@ -380,5 +413,34 @@ public class LanParty : Aggregate<LanPartyId>
     {
         proposal.RemoveVeto(userId);
         Raise(new VetoRemoved(Id, userId, proposal.GameModeId));
+    }
+    private void RemoveProposalInternal(Proposal proposal, UserId removedBy)
+    {
+        proposals.Remove(proposal);
+
+        Raise(new ProposalRemoved(Id, removedBy, proposal.GameModeId));
+
+        foreach (var vote in proposal.Votes)
+            Raise(new VoteRemoved(Id, vote.UserId, proposal.GameModeId, vote.Direction));
+
+        foreach (var veto in proposal.Vetos)
+            Raise(new VetoRemoved(Id, veto, proposal.GameModeId));
+    }
+
+    private void RemoveParticipantInternal(Participant participant)
+    {
+        var userId = participant.UserId;
+
+        participants.Remove(participant);
+        Raise(new ParticipantLeft(Id, userId));
+
+        foreach (var proposal in proposals)
+        {
+            if (proposal.FindVote(userId) is { } vote)
+                RemoveVoteInternal(proposal, vote);
+        }
+
+        if (FindProposalVetoedBy(userId) is { } veto)
+            RemoveVetoInternal(veto, userId);
     }
 }
