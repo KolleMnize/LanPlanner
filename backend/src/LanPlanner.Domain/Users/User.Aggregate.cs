@@ -1,5 +1,6 @@
 using ErrorOr;
 using LanPlanner.Domain.SharedKernel;
+using LanPlanner.Domain.Users.Events;
 
 namespace LanPlanner.Domain.Users;
 
@@ -14,23 +15,23 @@ public class User : Aggregate<UserId>
     {
         if (string.IsNullOrEmpty(email))
         {
-            return Error.Validation(
-                code: "User.InvalidEmail",
-                description: "Email cannot be empty.");
+            return UserErrors.EmailRequired;
         }
 
         if (string.IsNullOrEmpty(name))
         {
-            return Error.Validation(
-                code: "User.InvalidName",
-                description: "Name cannot be empty.");
+            return UserErrors.NameRequired;
         }
 
-        return new User
+        var newUser = new User
         {
             Id = id,
             Email = email,
             Name = name
         };
+
+        newUser.Raise(new UserCreated(newUser.Id, newUser.Name));
+
+        return newUser;
     }
 }
