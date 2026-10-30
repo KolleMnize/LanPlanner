@@ -8,6 +8,7 @@ public class User : Aggregate<UserId>
 {
     public required string Email { get; init; }
     public required string Name { get; init; }
+    public bool IsAdmin { get; init; } = false;
 
     private User() { } // Required by EF Core or other ORMs
 
@@ -27,7 +28,7 @@ public class User : Aggregate<UserId>
         {
             Id = id,
             Email = email,
-            Name = name
+            Name = name,
         };
 
         newUser.Raise(new UserCreated(newUser.Id, newUser.Name));

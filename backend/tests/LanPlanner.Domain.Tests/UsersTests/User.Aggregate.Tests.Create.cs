@@ -71,6 +71,7 @@ public partial class UserAggregateTests
         Assert.IsNotNull(result.Value);
         Assert.AreEqual("valid@email.com", result.Value.Email);
         Assert.AreEqual("Valid Name", result.Value.Name);
+        Assert.IsFalse(result.Value.IsAdmin);
         Assert.IsTrue(result.Value.DomainEvents[0] is UserCreated userCreated && userCreated.Name == "Valid Name" && userCreated.UserId == result.Value.Id);
     }
 
