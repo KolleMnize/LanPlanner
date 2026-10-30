@@ -17,6 +17,14 @@ public class AggregateTests
         new() { Id = new TestId(Guid.NewGuid()) };
 
     [TestMethod]
+    public void IAggregate_Id_gibt_die_Id_des_Aggregates_zurueck()
+    {
+        var aggregate = NeuesAggregate();
+
+        Assert.AreSame(aggregate.Id, ((IAggregate)aggregate).Id);
+    }
+
+    [TestMethod]
     public void Neues_Aggregate_hat_keine_Events()
     {
         var aggregate = NeuesAggregate();
