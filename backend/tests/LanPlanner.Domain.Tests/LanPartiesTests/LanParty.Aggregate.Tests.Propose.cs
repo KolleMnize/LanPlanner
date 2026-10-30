@@ -45,8 +45,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Propose(nonParticipant, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAParticipant, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAParticipant);
     }
 
     [TestMethod]
@@ -59,8 +58,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Propose(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
     }
 
     [TestMethod]
@@ -69,27 +67,11 @@ public partial class LanPartyAggregateTests
         var creator = UserId.Create(Guid.NewGuid()).Value;
         var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
         var gameMode = GameModeId.Create(Guid.NewGuid()).Value;
-
         lanParty.Propose(creator, gameMode);
+        lanParty.ClearDomainEvents();
+
         var result = lanParty.Propose(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.GameModeAlreadyProposed, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.GameModeAlreadyProposed);
     }
-
-    [TestMethod]
-    public void Propose_Invalid_KeepsStateAndRaisesNoEvent()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var notParticipant = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
-        var gameMode = GameModeId.Create(Guid.NewGuid()).Value;
-
-        var result = lanParty.Propose(notParticipant, gameMode);
-
-        Assert.IsTrue(result.IsError);
-        Assert.IsFalse(lanParty.Proposals.Any());
-        Assert.IsFalse(lanParty.DomainEvents.Any());
-    }
-
 }

@@ -35,9 +35,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.RemoveVeto(creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
     }
 
     [TestMethod]
@@ -49,9 +47,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.RemoveVeto(creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotVetoed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotVetoed);
     }
 
     [TestMethod]

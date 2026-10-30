@@ -56,8 +56,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.AppointModerator(participant, participant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAModerator);
     }
 
     [TestMethod]
@@ -68,11 +67,11 @@ public partial class LanPartyAggregateTests
         var lanParty = LanPartyTestData.CreateMockedLanPartyWithParticipant(creator, participant);
         lanParty.CloseVoting(creator);
         lanParty.EndParty(creator);
+        lanParty.ClearDomainEvents();
 
         var result = lanParty.AppointModerator(creator, participant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.Ended, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.Ended);
     }
 
     [TestMethod]
@@ -84,8 +83,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.AppointModerator(creator, nonParticipant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.TargetNotParticipant, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.TargetNotParticipant);
     }
 
     [TestMethod]
@@ -95,23 +93,10 @@ public partial class LanPartyAggregateTests
         var participant = UserId.Create(Guid.NewGuid()).Value;
         var lanParty = LanPartyTestData.CreateMockedLanPartyWithParticipant(creator, participant);
         lanParty.AppointModerator(creator, participant);
+        lanParty.ClearDomainEvents();
 
         var result = lanParty.AppointModerator(creator, participant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.TargetAlreadyModerator, result.Errors);
-    }
-
-    [TestMethod]
-    public void AppointModerator_Invalid_KeepsStateAndRaisesNoEvent()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var participant = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanPartyWithParticipant(creator, participant);
-
-        var result = lanParty.AppointModerator(creator, UserId.Create(Guid.NewGuid()).Value);
-
-        Assert.IsTrue(result.IsError);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.TargetAlreadyModerator);
     }
 }

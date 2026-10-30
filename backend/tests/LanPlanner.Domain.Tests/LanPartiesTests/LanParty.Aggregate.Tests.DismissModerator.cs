@@ -72,8 +72,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.DismissModerator(creator, creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.LastModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.LastModerator);
         Assert.IsTrue(lanParty.Moderators.Any(p => p == creator));
     }
 
@@ -86,8 +85,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.DismissModerator(participant, creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAModerator);
         Assert.IsTrue(lanParty.Moderators.Any(p => p == creator));
     }
 
@@ -99,11 +97,11 @@ public partial class LanPartyAggregateTests
         var lanParty = LanPartyTestData.CreateMockedLanPartyWithTwoModerators(creator, participant);
         lanParty.CloseVoting(creator);
         lanParty.EndParty(creator);
+        lanParty.ClearDomainEvents();
 
         var result = lanParty.DismissModerator(creator, participant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.Ended, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.Ended);
         Assert.IsTrue(lanParty.Moderators.Any(p => p == participant));
     }
 
@@ -116,8 +114,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.DismissModerator(creator, participant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.TargetNotModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.TargetNotModerator);
         Assert.IsTrue(lanParty.Moderators.Any(p => p == creator));
     }
 
@@ -130,21 +127,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.DismissModerator(creator, nonParticipant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.TargetNotParticipant, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.TargetNotParticipant);
         Assert.IsTrue(lanParty.Moderators.Any(p => p == creator));
     }
-
-    [TestMethod]
-    public void DismissModerator_Invalid_KeepsStateAndRaisesNoEvent()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
-
-        var result = lanParty.DismissModerator(creator, UserId.Create(Guid.NewGuid()).Value);
-
-        Assert.IsTrue(result.IsError);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
-    }
-
 }

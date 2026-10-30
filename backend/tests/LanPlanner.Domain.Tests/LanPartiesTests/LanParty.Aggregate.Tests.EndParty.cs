@@ -38,8 +38,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.EndParty(notModerator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAModerator);
     }
 
     [TestMethod]
@@ -50,8 +49,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.EndParty(creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotClosed, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotClosed);
     }
 
     [TestMethod]
@@ -62,19 +60,6 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.EndParty(creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.Ended, result.Errors);
-    }
-
-    [TestMethod]
-    public void End_Invalid_KeepsStateAndRaisesNoEvent()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanPartyEnded(creator);
-
-        var result = lanParty.EndParty(creator);
-
-        Assert.IsTrue(result.IsError);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.Ended);
     }
 }

@@ -50,8 +50,7 @@ public partial class LanPartyAggregateTests
         var newEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(21));
         var result = lanParty.ChangeDetails(participant, newName, newStart, newEnd);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAModerator);
     }
 
     [TestMethod]
@@ -65,8 +64,7 @@ public partial class LanPartyAggregateTests
         var newEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(21));
         var result = lanParty.ChangeDetails(creator, newName, newStart, newEnd);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.Ended, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.Ended);
     }
 
     [TestMethod]
@@ -80,8 +78,7 @@ public partial class LanPartyAggregateTests
         var newEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(21));
         var result = lanParty.ChangeDetails(creator, newName, newStart, newEnd);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NameRequired, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NameRequired);
     }
 
     [TestMethod]
@@ -95,8 +92,7 @@ public partial class LanPartyAggregateTests
         var newEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(19));
         var result = lanParty.ChangeDetails(creator, newName, newStart, newEnd);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.EndBeforeStart, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.EndBeforeStart);
     }
 
     [TestMethod]
@@ -114,8 +110,7 @@ public partial class LanPartyAggregateTests
         var newEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(19));
         var result = lanParty.ChangeDetails(creator, newName, newStart, newEnd);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NameRequired, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NameRequired);
         Assert.AreEqual(oldName, lanParty.Name);
         Assert.AreEqual(oldStart, lanParty.Start);
         Assert.AreEqual(oldEnd, lanParty.End);

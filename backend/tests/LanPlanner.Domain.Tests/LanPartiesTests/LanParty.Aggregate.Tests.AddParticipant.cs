@@ -30,6 +30,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Join(newUser);
 
+
         Assert.IsFalse(result.IsError);
         Assert.IsTrue(lanParty.DomainEvents.Any(e => e is ParticipantJoined));
     }
@@ -40,12 +41,12 @@ public partial class LanPartyAggregateTests
         var creator = UserId.Create(Guid.NewGuid()).Value;
         var newUser = UserId.Create(Guid.NewGuid()).Value;
         var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
+        lanParty.Join(newUser);
+        lanParty.ClearDomainEvents();
+
         var result = lanParty.Join(newUser);
 
-        result = lanParty.Join(newUser);
-
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.AlreadyParticipant, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.AlreadyParticipant);
     }
 
     [TestMethod]
@@ -70,19 +71,6 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Join(newUser);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.Ended, result.Errors);
-    }
-
-    [TestMethod]
-    public void Join_Invalid_KeepsStateAndRaisesNoEvent()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
-
-        var result = lanParty.Join(creator);
-
-        Assert.IsTrue(result.IsError);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.Ended);
     }
 }

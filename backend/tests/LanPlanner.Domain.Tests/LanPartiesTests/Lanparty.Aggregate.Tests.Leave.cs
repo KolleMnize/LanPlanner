@@ -167,10 +167,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Leave(nonParticipant);
 
-
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAParticipant, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAParticipant);
     }
 
     [TestMethod]
@@ -185,9 +182,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Leave(participant);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.Ended, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.Ended);
     }
 
     [TestMethod]
@@ -198,8 +193,6 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.Leave(creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.LastModerator, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.LastModerator);
     }
 }

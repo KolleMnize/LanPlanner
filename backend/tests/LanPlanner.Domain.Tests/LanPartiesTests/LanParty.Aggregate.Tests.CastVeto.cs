@@ -32,9 +32,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVeto(nonParticipant, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAParticipant, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAParticipant);
     }
 
     [TestMethod]
@@ -46,9 +44,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVeto(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
     }
 
     [TestMethod]
@@ -60,9 +56,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVeto(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.GameModeNotProposed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.GameModeNotProposed);
     }
 
     [TestMethod]
@@ -76,9 +70,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVeto(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.AlreadyVetoed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.AlreadyVetoed);
     }
 
     [TestMethod]
@@ -94,9 +86,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVeto(creator, secondGameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.AlreadyVetoed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.AlreadyVetoed);
     }
 
     [TestMethod]
