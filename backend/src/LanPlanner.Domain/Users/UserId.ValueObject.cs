@@ -12,7 +12,7 @@ namespace LanPlanner.Domain.Users
         public static ErrorOr<UserId> Create(Guid value)
         {
             if (value == Guid.Empty)
-                return Error.Validation("UserId", "UserId cannot be empty.");
+                return UserErrors.UserIdCannotBeEmpty;
 
             return new UserId(value);
         }
