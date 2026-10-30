@@ -18,7 +18,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.AreEqual(VoteDirection.Down, lanParty.GetVote(creator, gameMode));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VoteChanged vc && vc.GameModeId == gameMode && vc.UserId == creator && vc.NewDirection == VoteDirection.Down));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VoteChanged vc && vc.GameModeId == gameMode && vc.UserId == creator && vc.NewDirection == VoteDirection.Down);
     }
 
     [TestMethod]
@@ -32,7 +32,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.AreEqual(VoteDirection.Up, lanParty.GetVote(creator, gameMode));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VoteChanged vc && vc.GameModeId == gameMode && vc.UserId == creator && vc.NewDirection == VoteDirection.Up));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VoteChanged vc && vc.GameModeId == gameMode && vc.UserId == creator && vc.NewDirection == VoteDirection.Up);
     }
 
     [TestMethod]
@@ -44,9 +44,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.ChangeVote(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
     }
 
     [TestMethod]
@@ -58,9 +56,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.ChangeVote(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotVoted, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotVoted);
     }
 
     [TestMethod]
@@ -72,9 +68,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.ChangeVote(creator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.GameModeNotProposed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.GameModeNotProposed);
     }
 
     [TestMethod]
@@ -84,16 +78,15 @@ public partial class LanPartyAggregateTests
         var otherUser = UserId.Create(Guid.NewGuid()).Value;
         var gameMode = GameModeId.Create(Guid.NewGuid()).Value;
         var lanParty = LanPartyTestData.CreateMockedLanPartyWithProposalAndVote(creator, gameMode, VoteDirection.Up);
-
         lanParty.Join(otherUser);
         lanParty.CastVote(otherUser, gameMode, VoteDirection.Up);
+        lanParty.ClearDomainEvents();
+
         var result = lanParty.ChangeVote(creator, gameMode);
 
         Assert.IsFalse(result.IsError);
         Assert.AreEqual(VoteDirection.Down, lanParty.GetVote(creator, gameMode));
         Assert.AreEqual(VoteDirection.Up, lanParty.GetVote(otherUser, gameMode));
-        Assert.IsFalse(lanParty.DomainEvents.Any(e => e is VoteChanged vc && vc.UserId == otherUser));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VoteChanged vc && vc.UserId == creator));
-
+        Assert.IsTrue(lanParty.DomainEvents[0] is VoteChanged vc && vc.UserId == creator && vc.NewDirection == VoteDirection.Down && vc.GameModeId == gameMode);
     }
 }

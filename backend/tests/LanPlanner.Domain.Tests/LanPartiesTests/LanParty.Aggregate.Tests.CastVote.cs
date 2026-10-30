@@ -46,9 +46,7 @@ public partial class LanPartyAggregateTests
         var nonParticipant = UserId.Create(Guid.NewGuid()).Value;
         var result = lanParty.CastVote(nonParticipant, gameMode, VoteDirection.Up);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAParticipant, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAParticipant);
     }
 
     [TestMethod]
@@ -60,9 +58,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVote(creator, gameMode, VoteDirection.Up);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.AlreadyVoted, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any(e => e is GameModeUpvoted));
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.AlreadyVoted);
     }
 
     [TestMethod]
@@ -74,9 +70,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CastVote(creator, gameMode, VoteDirection.Up);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
     }
     [TestMethod]
     public void Vote_NotProposed_ReturnsGameModeNotProposed()
@@ -88,9 +82,7 @@ public partial class LanPartyAggregateTests
         var nonProposedGameMode = GameModeId.Create(Guid.NewGuid()).Value;
         var result = lanParty.CastVote(creator, nonProposedGameMode, VoteDirection.Up);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.GameModeNotProposed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.GameModeNotProposed);
     }
 
 

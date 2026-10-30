@@ -138,10 +138,8 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.RemoveProposal(participant, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAModerator);
         Assert.IsTrue(lanParty.Proposals.Contains(gameMode));
-        Assert.IsFalse(lanParty.DomainEvents.Any());
     }
 
     [TestMethod]
@@ -153,10 +151,8 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.RemoveProposal(moderator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
         Assert.IsTrue(lanParty.Proposals.Contains(gameMode));
-        Assert.IsFalse(lanParty.DomainEvents.Any());
     }
 
     [TestMethod]
@@ -168,8 +164,6 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.RemoveProposal(moderator, gameMode);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.GameModeNotProposed, result.Errors);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.GameModeNotProposed);
     }
 }

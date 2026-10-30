@@ -16,18 +16,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.IsFalse(lanParty.VotingIsOpen);
-    }
-
-    [TestMethod]
-    public void CloseVoting_Moderator_RaisesVotingClosed()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
-
-        var result = lanParty.CloseVoting(creator);
-
-        Assert.IsFalse(result.IsError);
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VotingClosed));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VotingClosed);
     }
 
     [TestMethod]
@@ -39,8 +28,7 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CloseVoting(nonModerator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.NotAModerator, result.Errors);
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.NotAModerator);
     }
 
     [TestMethod]
@@ -51,19 +39,6 @@ public partial class LanPartyAggregateTests
 
         var result = lanParty.CloseVoting(creator);
 
-        Assert.IsTrue(result.IsError);
-        Assert.Contains(LanPartyErrors.VotingNotOpen, result.Errors);
-    }
-
-    [TestMethod]
-    public void CloseVoting_Invalid_KeepsStateAndRaisesNoEvent()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanPartyWithVotingClosed(creator);
-
-        var result = lanParty.CloseVoting(creator);
-
-        Assert.IsTrue(result.IsError);
-        Assert.IsFalse(lanParty.DomainEvents.Any());
+        LanPartyAssert.FailedWith(result, lanParty, LanPartyErrors.VotingNotOpen);
     }
 }
