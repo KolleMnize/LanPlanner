@@ -20,7 +20,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.IsNull(lanParty.GetVeto(creator));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VetoRemoved removed && removed.GameModeId == gameMode && removed.UserId == creator));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VetoRemoved removed && removed.GameModeId == gameMode && removed.UserId == creator);
     }
 
     [TestMethod]
@@ -69,7 +69,7 @@ public partial class LanPartyAggregateTests
         Assert.IsFalse(result.IsError);
         Assert.IsNull(lanParty.GetVeto(creator));
         Assert.AreEqual(secondGameMode, lanParty.GetVeto(otherUser));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VetoRemoved removed && removed.GameModeId == firstGameMode && removed.UserId == creator));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VetoRemoved removed && removed.GameModeId == firstGameMode && removed.UserId == creator);
     }
 
     [TestMethod]
@@ -89,7 +89,7 @@ public partial class LanPartyAggregateTests
         Assert.IsFalse(removeResult.IsError);
         Assert.IsFalse(castResult.IsError);
         Assert.AreEqual(secondGameMode, lanParty.GetVeto(creator));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VetoRemoved removed && removed.GameModeId == firstGameMode && removed.UserId == creator));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is GameModeVetoed vetoed && vetoed.GameModeId == secondGameMode && vetoed.UserId == creator));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VetoRemoved removed && removed.GameModeId == firstGameMode && removed.UserId == creator);
+        Assert.IsTrue(lanParty.DomainEvents[1] is GameModeVetoed vetoed && vetoed.GameModeId == secondGameMode && vetoed.UserId == creator);
     }
 }

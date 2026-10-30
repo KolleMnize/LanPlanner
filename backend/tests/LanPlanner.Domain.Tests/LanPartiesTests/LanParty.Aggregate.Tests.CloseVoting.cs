@@ -16,18 +16,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.IsFalse(lanParty.VotingIsOpen);
-    }
-
-    [TestMethod]
-    public void CloseVoting_Moderator_RaisesVotingClosed()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanParty(creator);
-
-        var result = lanParty.CloseVoting(creator);
-
-        Assert.IsFalse(result.IsError);
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is VotingClosed));
+        Assert.IsTrue(lanParty.DomainEvents[0] is VotingClosed);
     }
 
     [TestMethod]

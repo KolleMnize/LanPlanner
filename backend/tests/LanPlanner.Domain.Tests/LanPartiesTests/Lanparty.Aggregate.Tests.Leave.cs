@@ -73,6 +73,7 @@ public partial class LanPartyAggregateTests
         Assert.AreEqual(VoteDirection.Down, lanParty.GetVote(otherParticipant, firstGameMode));
         Assert.IsNull(lanParty.GetVeto(participantLeaving));
         Assert.AreEqual(firstGameMode, lanParty.GetVeto(otherParticipant));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ParticipantLeft participant && participant.UserId == participantLeaving);
     }
 
     [TestMethod]
@@ -85,12 +86,14 @@ public partial class LanPartyAggregateTests
         var lanParty = LanPartyTestData.CreateMockedLanPartyWithParticipant(creator, proposer);
         lanParty.Propose(creator, creatorProposal);
         lanParty.Propose(proposer, participantProposal);
+        lanParty.ClearDomainEvents();
 
         var result = lanParty.Leave(proposer);
 
         Assert.IsFalse(result.IsError);
         Assert.IsTrue(lanParty.Proposals.Contains(creatorProposal));
         Assert.IsTrue(lanParty.Proposals.Contains(participantProposal));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ParticipantLeft participant && participant.UserId == proposer);
     }
 
     [TestMethod]
@@ -106,6 +109,7 @@ public partial class LanPartyAggregateTests
         Assert.IsFalse(lanParty.Participants.Contains(creator));
         Assert.IsFalse(lanParty.Moderators.Contains(creator));
         Assert.IsTrue(lanParty.Moderators.Contains(secondModerator));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ParticipantLeft participant && participant.UserId == creator);
     }
 
     [TestMethod]
@@ -125,18 +129,9 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.IsNull(lanParty.GetVote(participant, gameMode));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e =>
-            e is ParticipantLeft participantLeft
-            && participantLeft.UserId == participant));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e =>
-            e is VoteRemoved voteRemoved
-            && voteRemoved.UserId == participant
-            && voteRemoved.GameModeId == gameMode
-            && voteRemoved.RemovedDirection == VoteDirection.Up));
-        Assert.IsTrue(lanParty.DomainEvents.Any(e =>
-            e is VetoRemoved vetoRemoved
-            && vetoRemoved.UserId == participant
-            && vetoRemoved.GameModeId == gameMode));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ParticipantLeft participantLeft && participantLeft.UserId == participant);
+        Assert.IsTrue(lanParty.DomainEvents[1] is VoteRemoved voteRemoved && voteRemoved.UserId == participant && voteRemoved.GameModeId == gameMode && voteRemoved.RemovedDirection == VoteDirection.Up);
+        Assert.IsTrue(lanParty.DomainEvents[2] is VetoRemoved vetoRemoved && vetoRemoved.UserId == participant && vetoRemoved.GameModeId == gameMode);
     }
 
     [TestMethod]
@@ -148,6 +143,7 @@ public partial class LanPartyAggregateTests
         var lanParty = LanPartyTestData.CreateMockedLanPartyWithParticipant(creator, participant);
         lanParty.Propose(creator, gameMode);
         lanParty.CastVote(participant, gameMode, VoteDirection.Up);
+        lanParty.ClearDomainEvents();
 
         var leaveResult = lanParty.Leave(participant);
         var joinResult = lanParty.Join(participant);
@@ -156,6 +152,9 @@ public partial class LanPartyAggregateTests
         Assert.IsFalse(joinResult.IsError);
         Assert.IsTrue(lanParty.Participants.Contains(participant));
         Assert.IsNull(lanParty.GetVote(participant, gameMode));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ParticipantLeft pl && pl.UserId == participant);
+        Assert.IsTrue(lanParty.DomainEvents[1] is VoteRemoved vr && vr.UserId == participant);
+        Assert.IsTrue(lanParty.DomainEvents[2] is ParticipantJoined pj && pj.UserId == participant);
     }
 
     [TestMethod]

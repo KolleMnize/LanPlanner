@@ -20,19 +20,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.IsTrue(lanParty.Proposals.Any(p => p == gameMode));
-    }
-
-    [TestMethod]
-    public void Propose_Valid_RaisesGameModeProposed()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var participant = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanPartyWithParticipant(creator, participant);
-        var gameMode = GameModeId.Create(Guid.NewGuid()).Value;
-
-        lanParty.Propose(participant, gameMode);
-
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is GameModeProposed gmp && gmp.ProposedGameMode == gameMode && gmp.ProposedBy == participant));
+        Assert.IsTrue(lanParty.DomainEvents[0] is GameModeProposed gmp && gmp.ProposedGameMode == gameMode && gmp.ProposedBy == participant);
     }
 
     [TestMethod]

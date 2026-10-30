@@ -22,6 +22,7 @@ public partial class LanPartyAggregateTests
         Assert.IsFalse(result.IsError);
         Assert.HasCount(1, lanParty.Moderators);
         Assert.IsFalse(lanParty.Moderators.Any(p => p == participant));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ModeratorDismissed mde && mde.UserId == participant);
     }
 
     [TestMethod]
@@ -35,19 +36,7 @@ public partial class LanPartyAggregateTests
 
         Assert.IsFalse(result.IsError);
         Assert.IsTrue(lanParty.Participants.Any(p => p == participant));
-    }
-
-    [TestMethod]
-    public void DismissModerator_Valid_RaisesModeratorDismissed()
-    {
-        var creator = UserId.Create(Guid.NewGuid()).Value;
-        var participant = UserId.Create(Guid.NewGuid()).Value;
-        var lanParty = LanPartyTestData.CreateMockedLanPartyWithTwoModerators(creator, participant);
-
-        var result = lanParty.DismissModerator(creator, participant);
-
-        Assert.IsFalse(result.IsError);
-        Assert.IsTrue(lanParty.DomainEvents.Any(e => e is ModeratorDismissed mde && mde.UserId == participant));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ModeratorDismissed mde && mde.UserId == participant);
     }
 
     [TestMethod]
@@ -62,6 +51,7 @@ public partial class LanPartyAggregateTests
         Assert.IsFalse(result.IsError);
         Assert.IsFalse(lanParty.Moderators.Any(p => p == creator));
         Assert.IsTrue(lanParty.Moderators.Any(p => p == secondModerator));
+        Assert.IsTrue(lanParty.DomainEvents[0] is ModeratorDismissed mde && mde.UserId == creator);
     }
 
     [TestMethod]
