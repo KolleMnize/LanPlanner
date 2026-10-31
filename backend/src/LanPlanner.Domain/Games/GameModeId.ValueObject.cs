@@ -10,7 +10,7 @@ public class GameModeId : EntityId
     public static ErrorOr<GameModeId> Create(Guid value)
     {
         if (value == Guid.Empty)
-            return GameModeErrors.GameModeIdCannotBeEmpty;
+            return GameErrors.GameModeIdCannotBeEmpty;
 
         return new GameModeId(value);
     }
