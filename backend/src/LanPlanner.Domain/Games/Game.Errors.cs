@@ -4,6 +4,12 @@ namespace LanPlanner.Domain.Games;
 
 public static class GameErrors
 {
+    // GameId value object validation errors
+    public static readonly Error GameIdCannotBeEmpty = Error.Validation(
+        code: "Game.GameIdCannotBeEmpty",
+        description: "GameId cannot be empty."
+    );
+
     // GameName value object validation errors
     public static readonly Error NameRequired = Error.Validation(
         code: "Game.NameRequired",
@@ -14,6 +20,11 @@ public static class GameErrors
         code: "Game.NameTooLong",
         description: "Game name is too long."
     );
+
+    public static readonly Error NameAlreadyTaken = Error.Conflict(
+        code: "Game.NameAlreadyTaken",
+        description: "Game name is already taken."
+    ); // used from application layer to indicate name conflicts
 
     // MaxPlayers value object validation errors
     public static readonly Error MaxPlayersInvalid = Error.Validation(
