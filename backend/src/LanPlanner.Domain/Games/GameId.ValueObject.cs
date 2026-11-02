@@ -1,20 +1,20 @@
 using ErrorOr;
 using LanPlanner.Domain.SharedKernel;
 
-namespace LanPlanner.Domain.Games
+namespace LanPlanner.Domain.Games;
+
+public class GameId : AggregateId
 {
-    public class GameId : AggregateId
+    private GameId(Guid value) : base(value)
     {
-        private GameId(Guid value) : base(value)
-        {
-        }
+    }
 
-        public static ErrorOr<GameId> Create(Guid value)
-        {
-            if (value == Guid.Empty)
-                return GameErrors.GameIdCannotBeEmpty;
+    public static ErrorOr<GameId> Create(Guid value)
+    {
+        if (value == Guid.Empty)
+            return GameErrors.GameIdCannotBeEmpty;
 
-            return new GameId(value);
-        }
+        return new GameId(value);
     }
 }
+

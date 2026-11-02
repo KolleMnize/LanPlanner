@@ -11,11 +11,13 @@ public sealed class GameMode
 
     private GameMode() { } // for ORM
 
-    internal static GameMode CreateDefault(GameModeId id, MaxPlayers maxPlayers)
+    internal static GameMode CreateDefault(MaxPlayers maxPlayers)
     {
+        var gameModeId = GameModeId.NewForDefault();
+
         var gameMode = new GameMode
         {
-            Id = id,
+            Id = gameModeId,
             Name = GameModeName.Default,
             MaxPlayers = maxPlayers,
             IsDefault = true

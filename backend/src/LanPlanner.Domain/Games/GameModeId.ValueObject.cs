@@ -3,10 +3,11 @@ using LanPlanner.Domain.SharedKernel;
 
 namespace LanPlanner.Domain.Games;
 
-public class GameModeId : EntityId
+public sealed class GameModeId : EntityId
 {
-    public GameModeId(Guid value) : base(value) { }
+    private GameModeId(Guid value) : base(value) { }
 
+    internal static GameModeId NewForDefault() => Create(Guid.NewGuid()).Value;
     public static ErrorOr<GameModeId> Create(Guid value)
     {
         if (value == Guid.Empty)
