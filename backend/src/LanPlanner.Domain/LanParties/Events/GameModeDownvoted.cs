@@ -4,4 +4,4 @@ using LanPlanner.Domain.Users;
 
 namespace LanPlanner.Domain.LanParties.Events;
 
-public sealed record class GameModeDownvoted(LanPartyId LanPartyId, UserId UserId, GameModeId GameModeId) : IDomainEvent;
+public sealed record GameModeDownvoted(LanPartyId LanPartyId, UserId UserId, GameModeId GameModeId) : IDomainEvent;

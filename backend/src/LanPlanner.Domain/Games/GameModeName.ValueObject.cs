@@ -24,4 +24,6 @@ public sealed record GameModeName
         return new GameModeName(cleanedValue);
 
     }
+
+    internal static GameModeName Default => new GameModeName("Standard");
 }
