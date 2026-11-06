@@ -41,6 +41,19 @@ public class Game : Aggregate<GameId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> AddMode(GameModeName name, MaxPlayers maxPlayers)
+    {
+        if (IsModeNameTaken(name))
+            return GameErrors.GameModeNameAlreadyTaken;
+
+        var gameModeId = GameModeId.NewForAddMode();
+
+        var gameMode = GameMode.Create(gameModeId, name, maxPlayers);
+
+        AddModeInternal(gameMode);
+        return Result.Success;
+    }
+
     private void AddModeInternal(GameMode gameMode)
     {
         gameModes.Add(gameMode);
@@ -51,5 +64,14 @@ public class Game : Aggregate<GameId>
     {
         Name = newName;
         Raise(new GameRenamed(Id, Name.Value));
+    }
+
+    private GameMode? GetModeById(GameModeId id)
+    {
+        return gameModes.FirstOrDefault(m => m.Id == id);
+    }
+    private bool IsModeNameTaken(GameModeName name, GameModeId? excludeId = null)
+    {
+        return gameModes.Any(m => m.Name == name && (excludeId == null || m.Id != excludeId));
     }
 }
