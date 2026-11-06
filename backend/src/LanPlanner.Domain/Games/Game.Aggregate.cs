@@ -54,6 +54,25 @@ public class Game : Aggregate<GameId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> RenameMode(GameModeId gameModeId, GameModeName newName)
+    {
+        var gameMode = GetModeById(gameModeId);
+        if (gameMode is null)
+            return GameErrors.GameModeNotFound;
+
+        if (gameMode.IsDefault)
+            return GameErrors.DefaultModeCannotBeRenamed;
+
+        if (IsModeNameTaken(newName, gameModeId))
+            return GameErrors.GameModeNameAlreadyTaken;
+
+        if (gameMode.Name == newName)
+            return GameErrors.GameModeNameUnchanged;
+
+        RenameModeInternal(gameMode, newName);
+        return Result.Success;
+    }
+
     private void AddModeInternal(GameMode gameMode)
     {
         gameModes.Add(gameMode);
@@ -73,5 +92,11 @@ public class Game : Aggregate<GameId>
     private bool IsModeNameTaken(GameModeName name, GameModeId? excludeId = null)
     {
         return gameModes.Any(m => m.Name == name && (excludeId == null || m.Id != excludeId));
+    }
+
+    private void RenameModeInternal(GameMode gameMode, GameModeName newName)
+    {
+        gameMode.Rename(newName);
+        Raise(new GameModeRenamed(Id, gameMode.Id, newName.Value));
     }
 }

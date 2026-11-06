@@ -5,11 +5,14 @@ namespace LanPlanner.Domain.Games;
 public sealed class GameMode
 {
     public required GameModeId Id { get; init; }
-    public required GameModeName Name { get; init; }
+    public GameModeName Name { get; private set; }
     public required MaxPlayers MaxPlayers { get; init; }
     public bool IsDefault { get; private set; }
 
-    private GameMode() { } // for ORM
+    private GameMode() // for ORM
+    {
+        Name = null!;
+    }
 
     internal static GameMode CreateDefault(MaxPlayers maxPlayers)
     {
@@ -37,6 +40,11 @@ public sealed class GameMode
         };
 
         return gameMode;
+    }
+
+    internal void Rename(GameModeName name)
+    {
+        Name = name;
     }
 
 }
