@@ -47,4 +47,10 @@ public static class GameErrors
         code: "Game.ModeNameTooLong",
         description: "Name is too long."
     );
+
+    //Game Errors
+    public static readonly Error GameNameUnchanged = Error.Conflict(
+        code: "Game.NameUnchanged",
+        description: "The new Name is the same as the current one."
+    );
 }

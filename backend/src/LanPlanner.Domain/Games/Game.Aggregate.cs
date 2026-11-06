@@ -27,10 +27,29 @@ public class Game : Aggregate<GameId>
         return newGame;
     }
 
+    public ErrorOr<Success> Rename(string newName)
+    {
+        var newGameName = GameName.Create(newName);
+
+        if (newGameName.IsError)
+            return newGameName.Errors;
+
+        if (Name == newGameName.Value)
+            return GameErrors.GameNameUnchanged;
+
+        RenameInteral(newGameName.Value);
+        return Result.Success;
+    }
+
     private void AddModeInternal(GameMode gameMode)
     {
         gameModes.Add(gameMode);
         Raise(new GameModeAdded(Id, gameMode.Id, gameMode.Name.Value, gameMode.MaxPlayers.Value));
     }
 
+    private void RenameInteral(GameName newName)
+    {
+        Name = newName;
+        Raise(new GameRenamed(Id, Name.Value));
+    }
 }
