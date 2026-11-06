@@ -48,6 +48,31 @@ public static class GameErrors
         description: "Name is too long."
     );
 
+    public static readonly Error GameModeNameAlreadyTaken = Error.Conflict(
+        code: "Game.ModeNameAlreadyTaken",
+        description: "Name is already taken."
+    );
+
+    public static readonly Error GameModeNameUnchanged = Error.Conflict(
+        code: "Game.ModeNameUnchanged",
+        description: "The new Name is the same as the current one."
+    );
+
+    public static readonly Error GameModeNotFound = Error.NotFound(
+        code: "Game.ModeNotFound",
+        description: "Game mode not found."
+    );
+
+    public static readonly Error DefaultModeCannotBeRenamed = Error.Conflict(
+        code: "Game.DefaultModeCannotBeRenamed",
+        description: "The default game mode cannot be renamed."
+    );
+
+    public static readonly Error GameModeMaxPlayersUnchanged = Error.Conflict(
+        code: "Game.ModeMaxPlayersUnchanged",
+        description: "The new MaxPlayers value is the same as the current one."
+    );
+
     //Game Errors
     public static readonly Error GameNameUnchanged = Error.Conflict(
         code: "Game.NameUnchanged",

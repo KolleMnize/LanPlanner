@@ -14,4 +14,17 @@ internal static class GameAggregateTestData
         game.ClearDomainEvents();
         return game;
     }
+
+    internal static Game CreateMockedGameWithSecondGameMode()
+    {
+        var gameId = GameId.Create(Guid.NewGuid()).Value;
+        var gameName = GameName.Create("Test Game").Value;
+        var maxPlayers = MaxPlayers.Create(4).Value;
+
+        var game = Game.Create(gameId, gameName, maxPlayers).Value;
+        game.AddMode(GameModeName.Create("Second Mode").Value, maxPlayers);
+
+        game.ClearDomainEvents();
+        return game;
+    }
 }
