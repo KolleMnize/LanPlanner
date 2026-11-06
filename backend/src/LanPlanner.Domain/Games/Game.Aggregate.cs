@@ -37,7 +37,7 @@ public class Game : Aggregate<GameId>
         if (Name == newGameName.Value)
             return GameErrors.GameNameUnchanged;
 
-        RenameInteral(newGameName.Value);
+        RenameInternal(newGameName.Value);
         return Result.Success;
     }
 
@@ -73,13 +73,26 @@ public class Game : Aggregate<GameId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> ChangeMaxPlayers(GameModeId gameModeId, MaxPlayers newMaxPlayers)
+    {
+        var gameMode = GetModeById(gameModeId);
+        if (gameMode is null)
+            return GameErrors.GameModeNotFound;
+
+        if (gameMode.MaxPlayers == newMaxPlayers)
+            return GameErrors.GameModeMaxPlayersUnchanged;
+
+        ChangeMaxPlayersInternal(gameMode, newMaxPlayers);
+        return Result.Success;
+    }
+
     private void AddModeInternal(GameMode gameMode)
     {
         gameModes.Add(gameMode);
         Raise(new GameModeAdded(Id, gameMode.Id, gameMode.Name.Value, gameMode.MaxPlayers.Value));
     }
 
-    private void RenameInteral(GameName newName)
+    private void RenameInternal(GameName newName)
     {
         Name = newName;
         Raise(new GameRenamed(Id, Name.Value));
@@ -98,5 +111,11 @@ public class Game : Aggregate<GameId>
     {
         gameMode.Rename(newName);
         Raise(new GameModeRenamed(Id, gameMode.Id, newName.Value));
+    }
+
+    private void ChangeMaxPlayersInternal(GameMode gameMode, MaxPlayers newMaxPlayers)
+    {
+        gameMode.ChangeMaxPlayers(newMaxPlayers);
+        Raise(new GameModeMaxPlayersChanged(Id, gameMode.Id, newMaxPlayers.Value));
     }
 }

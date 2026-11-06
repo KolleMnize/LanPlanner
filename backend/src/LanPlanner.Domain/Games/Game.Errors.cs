@@ -68,6 +68,11 @@ public static class GameErrors
         description: "The default game mode cannot be renamed."
     );
 
+    public static readonly Error GameModeMaxPlayersUnchanged = Error.Conflict(
+        code: "Game.ModeMaxPlayersUnchanged",
+        description: "The new MaxPlayers value is the same as the current one."
+    );
+
     //Game Errors
     public static readonly Error GameNameUnchanged = Error.Conflict(
         code: "Game.NameUnchanged",

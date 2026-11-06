@@ -6,12 +6,13 @@ public sealed class GameMode
 {
     public required GameModeId Id { get; init; }
     public GameModeName Name { get; private set; }
-    public required MaxPlayers MaxPlayers { get; init; }
+    public MaxPlayers MaxPlayers { get; private set; }
     public bool IsDefault { get; private set; }
 
     private GameMode() // for ORM
     {
         Name = null!;
+        MaxPlayers = null!;
     }
 
     internal static GameMode CreateDefault(MaxPlayers maxPlayers)
@@ -45,6 +46,11 @@ public sealed class GameMode
     internal void Rename(GameModeName name)
     {
         Name = name;
+    }
+
+    internal void ChangeMaxPlayers(MaxPlayers maxPlayers)
+    {
+        MaxPlayers = maxPlayers;
     }
 
 }
