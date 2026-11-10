@@ -9,9 +9,11 @@ public class Game : Aggregate<GameId>
 {
     private List<GameMode> gameModes = [];
     private List<Rating> ratings = [];
+    private List<UserId> owners = [];
     public GameName Name { get; private set; } = null!;
     public IReadOnlyList<GameMode> GameModes => gameModes.ToList().AsReadOnly();
     public IReadOnlyList<Rating> Ratings => ratings.ToList().AsReadOnly();
+    public IReadOnlyList<UserId> Owners => owners.ToList().AsReadOnly();
 
     private Game() { } // Required by EF Core or other ORMs
 
@@ -120,6 +122,35 @@ public class Game : Aggregate<GameId>
 
         RemoveRatingInternal(rating);
         return Result.Success;
+    }
+    public ErrorOr<Success> ReportOwnership(UserId userId)
+    {
+        if (owners.Contains(userId))
+            return GameErrors.ActorOwnershipAlreadyReported;
+
+        ReportOwnershipInternal(userId);
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> WithdrawOwnership(UserId userId)
+    {
+        if (!owners.Contains(userId))
+            return GameErrors.ActorOwnershipNotFound;
+
+        WithdrawOwnershipInternal(userId);
+        return Result.Success;
+    }
+
+    private void ReportOwnershipInternal(UserId userId)
+    {
+        owners.Add(userId);
+        Raise(new GameOwnershipReported(Id, userId));
+    }
+
+    private void WithdrawOwnershipInternal(UserId userId)
+    {
+        owners.Remove(userId);
+        Raise(new GameOwnershipWithdrawn(Id, userId));
     }
 
     private void AddModeInternal(GameMode gameMode)
