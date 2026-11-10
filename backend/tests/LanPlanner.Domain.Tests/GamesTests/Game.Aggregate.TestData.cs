@@ -36,4 +36,11 @@ internal static class GameAggregateTestData
         game.ClearDomainEvents();
         return game;
     }
+    internal static Game CreateMockedGameWithOwnership(UserId userId)
+    {
+        var game = CreateMockedGame();
+        game.ReportOwnership(userId);
+        game.ClearDomainEvents();
+        return game;
+    }
 }
