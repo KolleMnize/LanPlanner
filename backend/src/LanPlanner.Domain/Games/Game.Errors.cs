@@ -78,4 +78,16 @@ public static class GameErrors
         code: "Game.NameUnchanged",
         description: "The new Name is the same as the current one."
     );
+
+
+    // Stars value object validation errors
+    public static readonly Error StarsOutOfRange = Error.Validation(
+        code: "Game.StarsOutOfRange",
+        description: "Stars value is out of range."
+    );
+
+    public static readonly Error ActorAlreadyRated = Error.Conflict(
+        code: "Game.ActorAlreadyRated",
+        description: "The actor has already rated this game."
+    );
 }
