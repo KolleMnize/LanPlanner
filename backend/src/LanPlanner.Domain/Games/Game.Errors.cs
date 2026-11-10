@@ -79,6 +79,12 @@ public static class GameErrors
         description: "The new Name is the same as the current one."
     );
 
+    public static readonly Error DefaultModeCannotBeRemoved = Error.Conflict(
+        code: "Game.DefaultModeCannotBeRemoved",
+        description: "The default game mode cannot be removed."
+    );
+
+
 
     // Stars value object validation errors
     public static readonly Error StarsOutOfRange = Error.Validation(

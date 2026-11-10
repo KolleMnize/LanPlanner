@@ -141,6 +141,29 @@ public class Game : Aggregate<GameId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> RemoveMode(GameModeId modeId)
+    {
+        var gameMode = GetModeById(modeId);
+        if (gameMode is null)
+            return GameErrors.GameModeNotFound;
+
+        if (gameMode.IsDefault)
+            return GameErrors.DefaultModeCannotBeRemoved;
+
+        RemoveModeInternal(gameMode);
+        return Result.Success;
+    }
+
+    public ErrorOr<Deleted> Delete()
+    {
+        foreach (var gameMode in gameModes.ToList())
+            RemoveModeInternal(gameMode);
+
+        Raise(new GameDeleted(Id));
+        return Result.Deleted;
+    }
+
+
     private void ReportOwnershipInternal(UserId userId)
     {
         owners.Add(userId);
@@ -208,5 +231,11 @@ public class Game : Aggregate<GameId>
     {
         ratings.Remove(rating);
         Raise(new GameRatingRemoved(Id, rating.UserId));
+    }
+
+    private void RemoveModeInternal(GameMode gameMode)
+    {
+        gameModes.Remove(gameMode);
+        Raise(new GameModeRemoved(Id, gameMode.Id));
     }
 }
