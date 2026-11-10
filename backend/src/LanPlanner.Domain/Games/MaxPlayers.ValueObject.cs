@@ -2,7 +2,7 @@ using ErrorOr;
 
 namespace LanPlanner.Domain.Games;
 
-public sealed record class MaxPlayers
+public sealed record MaxPlayers
 {
     public int Value { get; private init; }
 
