@@ -101,4 +101,15 @@ public static class GameErrors
         code: "Game.RatingUnchanged",
         description: "The new rating is the same as the current one."
     );
+
+    // Ownership errors
+    public static readonly Error ActorOwnershipAlreadyReported = Error.Conflict(
+        code: "Game.ActorOwnershipAlreadyReported",
+        description: "The actor has already reported ownership for this game."
+    );
+
+    public static readonly Error ActorOwnershipNotFound = Error.NotFound(
+        code: "Game.ActorOwnershipNotFound",
+        description: "The actor's ownership report was not found."
+    );
 }
