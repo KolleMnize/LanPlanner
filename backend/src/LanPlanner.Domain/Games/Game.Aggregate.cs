@@ -99,6 +99,29 @@ public class Game : Aggregate<GameId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> ChangeRating(UserId userId, Stars newStars)
+    {
+        var rating = FindRating(userId);
+        if (rating is null)
+            return GameErrors.ActorRatingNotFound;
+
+        if (rating.Stars == newStars)
+            return GameErrors.RatingUnchanged;
+
+        ChangeRatingInternal(rating, newStars);
+        return Result.Success;
+    }
+
+    public ErrorOr<Success> RemoveRating(UserId userId)
+    {
+        var rating = FindRating(userId);
+        if (rating is null)
+            return GameErrors.ActorRatingNotFound;
+
+        RemoveRatingInternal(rating);
+        return Result.Success;
+    }
+
     private void AddModeInternal(GameMode gameMode)
     {
         gameModes.Add(gameMode);
@@ -142,5 +165,17 @@ public class Game : Aggregate<GameId>
         var newRating = new Rating(userId, stars);
         ratings.Add(newRating);
         Raise(new GameRated(Id, userId, stars.Value));
+    }
+
+    private void ChangeRatingInternal(Rating rating, Stars newStars)
+    {
+        ratings[ratings.IndexOf(rating)] = rating with { Stars = newStars };
+        Raise(new GameRatingChanged(Id, rating.UserId, newStars.Value));
+    }
+
+    private void RemoveRatingInternal(Rating rating)
+    {
+        ratings.Remove(rating);
+        Raise(new GameRatingRemoved(Id, rating.UserId));
     }
 }
