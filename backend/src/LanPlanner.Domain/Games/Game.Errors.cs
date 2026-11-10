@@ -86,8 +86,19 @@ public static class GameErrors
         description: "Stars value is out of range."
     );
 
+    // Rating errors
     public static readonly Error ActorAlreadyRated = Error.Conflict(
         code: "Game.ActorAlreadyRated",
         description: "The actor has already rated this game."
+    );
+
+    public static readonly Error ActorRatingNotFound = Error.NotFound(
+        code: "Game.ActorRatingNotFound",
+        description: "The actor's rating was not found."
+    );
+
+    public static readonly Error RatingUnchanged = Error.Conflict(
+        code: "Game.RatingUnchanged",
+        description: "The new rating is the same as the current one."
     );
 }

@@ -1,4 +1,5 @@
 using LanPlanner.Domain.Games;
+using LanPlanner.Domain.Users;
 
 namespace LanPlanner.Domain.Tests.GamesTests;
 
@@ -24,6 +25,14 @@ internal static class GameAggregateTestData
         var game = Game.Create(gameId, gameName, maxPlayers).Value;
         game.AddMode(GameModeName.Create("Second Mode").Value, maxPlayers);
 
+        game.ClearDomainEvents();
+        return game;
+    }
+
+    internal static Game CreateMockedGameWithRating(UserId userId, Stars stars)
+    {
+        var game = CreateMockedGame();
+        game.Rate(userId, stars);
         game.ClearDomainEvents();
         return game;
     }
