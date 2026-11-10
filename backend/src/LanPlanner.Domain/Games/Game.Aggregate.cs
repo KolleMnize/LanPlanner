@@ -1,14 +1,17 @@
 using ErrorOr;
 using LanPlanner.Domain.Games.Events;
 using LanPlanner.Domain.SharedKernel;
+using LanPlanner.Domain.Users;
 
 namespace LanPlanner.Domain.Games;
 
 public class Game : Aggregate<GameId>
 {
     private List<GameMode> gameModes = [];
+    private List<Rating> ratings = [];
     public GameName Name { get; private set; } = null!;
     public IReadOnlyList<GameMode> GameModes => gameModes.ToList().AsReadOnly();
+    public IReadOnlyList<Rating> Ratings => ratings.ToList().AsReadOnly();
 
     private Game() { } // Required by EF Core or other ORMs
 
@@ -86,6 +89,16 @@ public class Game : Aggregate<GameId>
         return Result.Success;
     }
 
+    public ErrorOr<Success> Rate(UserId userId, Stars stars)
+    {
+        var rating = FindRating(userId);
+        if (rating is not null)
+            return GameErrors.ActorAlreadyRated;
+
+        RateInternal(userId, stars);
+        return Result.Success;
+    }
+
     private void AddModeInternal(GameMode gameMode)
     {
         gameModes.Add(gameMode);
@@ -117,5 +130,17 @@ public class Game : Aggregate<GameId>
     {
         gameMode.ChangeMaxPlayers(newMaxPlayers);
         Raise(new GameModeMaxPlayersChanged(Id, gameMode.Id, newMaxPlayers.Value));
+    }
+
+    private Rating? FindRating(UserId userId)
+    {
+        return ratings.FirstOrDefault(r => r.UserId == userId);
+    }
+
+    private void RateInternal(UserId userId, Stars stars)
+    {
+        var newRating = new Rating(userId, stars);
+        ratings.Add(newRating);
+        Raise(new GameRated(Id, userId, stars.Value));
     }
 }
